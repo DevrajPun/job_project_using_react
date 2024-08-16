@@ -7,9 +7,8 @@ const route = express.Router();
 route.post("/insert", UserController.insertUser);
 route.get("/login", UserController.veryLogin);
 route.get("/getAll", checkUseAuth, UserController.getAll);
-route.get("/getOne/:id", checkUseAuth, UserController.getOne);
+route.get("/getOne", checkUseAuth, UserController.getOne);
 route.get("/logout/:id", UserController.logout);
-
 route.get("/home", UserController.home);
 
 // jobs routes

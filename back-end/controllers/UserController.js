@@ -82,22 +82,22 @@ class UserController {
 
   static veryLogin = async (req, res) => {
     try {
-      const { email, password } = req.body;
+      const { email, password, role } = req.body;
 
       // Validate input fields
-      if (!email || !password) {
+      if (!email || !password || !role) {
         return res.status(400).json({
           status: "failed",
-          message: "Email and password are required",
+          message: "Email, password, and role are required",
         });
       }
 
-      // Find user by email
-      const user = await UserModel.findOne({ email });
+      // Find user by email and role
+      const user = await UserModel.findOne({ email, role });
       if (!user) {
         return res
           .status(404)
-          .json({ status: "failed", message: "User not found" });
+          .json({ status: "failed", message: "User not found. Please check your role." });
       }
 
       // Compare password with hashed password
@@ -129,7 +129,7 @@ class UserController {
       } else {
         return res
           .status(400)
-          .json({ status: "failed", message: "Unknown user role" });
+          .json({ status: "failed", message: "Unknown user role. Please check your role." });
       }
     } catch (error) {
       console.error("Error during login:", error);
@@ -139,6 +139,7 @@ class UserController {
       });
     }
   };
+
 
   static getAll = async (req, res) => {
     try {
@@ -150,18 +151,33 @@ class UserController {
       res.send(error);
     }
   };
+
   static getOne = async (req, res) => {
     try {
-      const user = await UserModel.findById(req.params.id);
+      const user = req.userdata; // Get the logged-in user's details from req.userdata
+
       if (!user) {
-        return res.status(404).json({ message: "User not found" });
+        return res.status(404).json({
+          status: "failed",
+          message: "User not found"
+        });
       }
-      res.status(200).json(user);
+
+      // Return the user details
+      res.status(200).json({
+        status: "success",
+        data: user,
+      });
     } catch (error) {
-      console.log(error.message);
-      res.status(400).json({ status: "failed", message: error.message });
+      console.error("Error fetching user:", error.message);
+      res.status(500).json({
+        status: "failed",
+        message: "Server error. Please try again later.",
+      });
     }
   };
+
+
   static logout = async (req, res) => {
     try {
       // Clear the authentication token from the cookies
